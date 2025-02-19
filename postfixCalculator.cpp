@@ -17,7 +17,8 @@ public:
         } else {
             top++;
             a[top] = item;
-    }   }
+        }
+    }
 
     // Pops item from the top of the stack. If it tries to pop an empty stack, then stack underflow!
     string pop() {
@@ -39,12 +40,14 @@ public:
         else {
             string x = a[top];
             return x;
-    }   }
+        }
+    }
 
     // Checks if the stack is empty
     bool isEmpty() {
         return (top < 0);
-}   };
+    }
+};
 
 
 // A check function
@@ -61,7 +64,10 @@ void expressionCheck(string infix) {
                 for (int j = 0; j < size(acceptableChars); j++) { // Sorts through operator list
                     if (infix[i] == acceptableChars[j]) break;
                     else if (j == size(acceptableChars) - 1) throw(infix[i]);
-    }   }   }   }
+                }
+            }
+        }
+    }
     catch (char problem) {
         cout << "Invalid character \'" << problem << "\'in expression";
     }
@@ -81,7 +87,7 @@ void parenthesesCheck(const string& infix) {
                 if (checker.pop() == "a") {
                     throw(false);
                 }
-        }
+            }
         if (!checker.isEmpty())
             throw(false);
     }
@@ -143,8 +149,9 @@ string* to_postfix(const string& infix) {
             } while (operator_priority(to_string(inChar)) <= operator_priority(postfix_op_stack.peek()));
             postfix_op_stack.push(to_string(inChar));
         }
+        }
+    }
 
-    } }
 
     return postfix;
 }
