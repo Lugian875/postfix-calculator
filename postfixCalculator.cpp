@@ -123,20 +123,17 @@ string* to_postfix(const string& infix) {
         // Open parenthesis? Push to stack
         if (inChar == '(' || inChar == '[' || inChar == '{') {
             postfix_op_stack.push(to_string(inChar));
-            if (postIndex != 0)
-                postIndex++;
             continue;
         }
-        // Closed parenthesis? Pop operators and add to stack until open para. encountered. Do not add parenthesis to stack
+        // Closed parenthesis? Pop operators and add to stack until open para. encountered.
+        // Do not add parenthesis to stack
         if (inChar == ')' || inChar == ']' || inChar == '}') {
-            do {
-                postfix[postIndex] = postfix_op_stack.pop();
+            while (postfix_op_stack.peek() != "(" && postfix_op_stack.peek() != "[" &&
+                    postfix_op_stack.peek() != "{") {
                 postIndex++;
-            } while (!postfix_op_stack.isEmpty() &&
-                    (postfix_op_stack.peek() != "(" ||
-                    postfix_op_stack.peek() != "[" ||
-                    postfix_op_stack.peek() != "{"));
-            postfix_op_stack.pop();
+                postfix[postIndex] = postfix_op_stack.pop();
+            }
+            postfix_op_stack.pop(); postIndex++;
             continue;
         }
 
