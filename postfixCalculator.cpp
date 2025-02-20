@@ -118,8 +118,17 @@ string* to_postfix(const string& infix) {
     Stack postfix_op_stack;
     string* postfix = new string[infix.size()];
     int postIndex = 0; // Current index of the postfix equation array
-    // // Reads the infix expression
-    // for (const char inChar : infix) {
+    // Reads the infix expression
+    for (const char inChar : infix) {
+        cout << "Index: " << postIndex << ", Current Value: " << postfix[postIndex] << endl;
+
+        // If operand, immediately appended to postfix string
+        if (inChar >= '0' && inChar <= '9') {
+            cout << "Operand detected, adding operand: " << inChar << endl;
+            postfix[postIndex] = postfix[postIndex] + inChar;
+            cout << "Index: " << postIndex << ", Current Value: " << postfix[postIndex] << endl << endl;
+            continue;
+        }
     //     // Open parenthesis? Push to stack
     //     if (inChar == '(' || inChar == '[' || inChar == '{') {
     //         postfix_op_stack.push(to_string(inChar));
@@ -136,14 +145,6 @@ string* to_postfix(const string& infix) {
     //         postfix_op_stack.pop(); postIndex++;
     //         continue;
     //     }
-    //
-    //     // If operand, immediately appended to postfix string
-    //     if (inChar >= '0' && inChar <= '9') {
-    //         postfix[postIndex] = postfix[postIndex] + inChar;
-    //         cout << postfix[postIndex] << endl;
-    //         continue;
-    //     }
-    //
     //     // Operator Comparisons //
     //     // Current Operator higher than at top? Push to stack
     //     if (postfix_op_stack.isEmpty() || operator_priority(to_string(inChar)) > operator_priority(postfix_op_stack.peek())) {
@@ -162,7 +163,7 @@ string* to_postfix(const string& infix) {
     // while (!postfix_op_stack.isEmpty()) {
     //     postfix[postIndex] = postfix_op_stack.pop();
     //     postIndex++;
-    // }
+    }
     return postfix;
 }
 
@@ -183,7 +184,7 @@ int main() {
     expressionCheck(infixExpression);
     parenthesesCheck(infixExpression);
     string* postfixExpression = to_postfix(infixExpression);
-    print_postfix(*postfixExpression);
+    // print_postfix(*postfixExpression);
     delete[] postfixExpression;
 
     return 0;
