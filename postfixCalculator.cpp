@@ -78,6 +78,7 @@ void expressionCheck(string infix) {
 /* Checks for the correct parentheses count in the string using a stack
 * If the stack is empty, then the equation is balanced. If not, throws an error
 */
+// TO DO: Expand parentheses check to also be operands check :D
 void parenthesesCheck(const string& infix) {
     try {
         Stack checker;
@@ -120,13 +121,32 @@ string* to_postfix(const string& infix) {
     int postIndex = 0; // Current index of the postfix equation array
     // Reads the infix expression
     for (const char inChar : infix) {
-        cout << "Index: " << postIndex << ", Current Value: " << postfix[postIndex] << endl;
 
         // If operand, immediately appended to postfix string
         if (inChar >= '0' && inChar <= '9') {
-            cout << "Operand detected, adding operand: " << inChar << endl;
             postfix[postIndex] = postfix[postIndex] + inChar;
-            cout << "Index: " << postIndex << ", Current Value: " << postfix[postIndex] << endl << endl;
+            continue;
+        }
+
+        // Parenthesis check
+        // Open parenthesis? Push to stack
+        if (inChar=='(' || inChar =='[' || inChar == '{') {
+            postfix_op_stack.push(string(1,inChar));
+            continue;
+        }
+
+        // Closed parenthesis?
+        // Pop operators and add to postfix until an open parenthesis is popped
+        // Do not add parenthesis to postfix
+        if (inChar == ')' || inChar == ']' || inChar == '}') {
+            while (postfix_op_stack.peek() != "(" &&
+                    postfix_op_stack.peek() != "[" &&
+                    postfix_op_stack.peek() != "{") {
+                postIndex++;
+                postfix[postIndex] = postfix_op_stack.pop();
+                    }
+            postfix_op_stack.pop();
+            postIndex++;
             continue;
         }
 
@@ -134,10 +154,8 @@ string* to_postfix(const string& infix) {
         // If the operator priority is higher than the top of stack?
         // Push to stack
         if (postfix_op_stack.isEmpty() ||
-            operator_priority(to_string(inChar)) > operator_priority(postfix_op_stack.peek())) {
-            cout << "Operator detector, and it has higher priority: " << inChar << endl;
+            operator_priority(string(1,inChar)) > operator_priority(postfix_op_stack.peek())) {
             postfix_op_stack.push(string (1,inChar));
-            cout << "Top of the stack: " << postfix_op_stack.peek() << endl;
             postIndex++;
             continue;
         }
@@ -147,34 +165,15 @@ string* to_postfix(const string& infix) {
         // Current operator priority is higher than top of stack OR stack is empty
         // Then push it to stack
         if (operator_priority(to_string(inChar)) <= operator_priority(postfix_op_stack.peek())) {
-            cout << "Operator detector, and it has the same or lower priority: " << inChar << endl;
             do {
                 postIndex++;
                 postfix[postIndex] = postfix_op_stack.pop();
-                cout << "Top of the stack: " << postfix_op_stack.peek() << endl;
             } while (!postfix_op_stack.isEmpty() &&
                 operator_priority(to_string(inChar)) <= operator_priority(postfix_op_stack.peek()));
             postfix_op_stack.push(string(1,inChar));
             postIndex++;
             continue;
         }
-
-    //     // Open parenthesis? Push to stack
-    //     if (inChar == '(' || inChar == '[' || inChar == '{') {
-    //         postfix_op_stack.push(to_string(inChar));
-    //         continue;
-    //     }
-    //     // Closed parenthesis? Pop operators and add to stack until open para. encountered.
-    //     // Do not add parenthesis to stack
-    //     if (inChar == ')' || inChar == ']' || inChar == '}') {
-    //         while (postfix_op_stack.peek() != "(" && postfix_op_stack.peek() != "[" &&
-    //                 postfix_op_stack.peek() != "{") {
-    //             postIndex++;
-    //             postfix[postIndex] = postfix_op_stack.pop();
-    //         }
-    //         postfix_op_stack.pop(); postIndex++;
-    //         continue;
-    //     }
     }
     while (!postfix_op_stack.isEmpty()) {
         postIndex++;
