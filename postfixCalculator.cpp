@@ -165,15 +165,14 @@ string* to_postfix(const string& infix) {
         // Operators get popped and added to the postfix equation array until
         // Current operator priority is higher than top of stack OR stack is empty
         // Then push it to stack
-        if (operator_priority(to_string(inChar)) <= operator_priority(postfix_op_stack.peek())) {
-            do {
+        if (operator_priority(string(1,inChar)) <= operator_priority(postfix_op_stack.peek())) {
+            while (!postfix_op_stack.isEmpty() &&
+                operator_priority(string(1,inChar)) <= operator_priority(postfix_op_stack.peek())) {
                 postIndex++;
                 postfix[postIndex] = postfix_op_stack.pop();
-            } while (!postfix_op_stack.isEmpty() &&
-                operator_priority(to_string(inChar)) <= operator_priority(postfix_op_stack.peek()));
+            }
             postfix_op_stack.push(string(1,inChar));
             postIndex++;
-            continue;
         }
     }
     while (!postfix_op_stack.isEmpty()) {
