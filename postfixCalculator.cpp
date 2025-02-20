@@ -92,7 +92,8 @@ void parenthesesCheck(const string& infix) {
             throw(false);
     }
     catch(bool wrongness) {
-        cout << "Invalid balancing" << wrongness << endl;
+        cout << "Invalid balancing " << wrongness << endl;
+        return;
     }
 }
 
@@ -126,7 +127,14 @@ string* to_postfix(const string& infix) {
         }
         // Closed parenthesis? Pop operators and add to stack until open para. encountered. Do not add parenthesis to stack
         if (inChar == ')' || inChar == ']' || inChar == '}') {
-
+            do {
+                postfix[postIndex] = postfix_op_stack.pop();
+                postIndex++;
+            } while (!postfix_op_stack.isEmpty() &&
+                    (postfix_op_stack.peek() != "(" ||
+                    postfix_op_stack.peek() != "[" ||
+                    postfix_op_stack.peek() != "{"));
+            postfix_op_stack.pop();
         }
 
         // If operand, immediately appended to postfix string
