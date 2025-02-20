@@ -116,7 +116,7 @@ int operator_priority(const string& oper) {
 // Infix to Postfix conversion
 string* to_postfix(const string& infix) {
     Stack postfix_op_stack;
-    string* postfix = new string[infix.size()];
+    string* postfix = new string[infix.size() + 1];
     int postIndex = 0; // Current index of the postfix equation array
     // Reads the infix expression
     for (const char inChar : infix) {
@@ -186,8 +186,13 @@ string* to_postfix(const string& infix) {
 }
 
 // Print postfix
-void print_postfix() {
-
+void print_postfix(string* postfix) {
+    int index = 0;
+    while (postfix[index] != "a") {
+        cout << postfix[index] << " ";
+        index++;
+    }
+    cout << endl;
 }
 
 // Arithmetic time
@@ -203,7 +208,7 @@ int main() {
     expressionCheck(infixExpression);
     parenthesesCheck(infixExpression);
     string* postfixExpression = to_postfix(infixExpression);
-    // print_postfix(postfixExpression);
+    print_postfix(postfixExpression);
     delete[] postfixExpression;
 
     return 0;
