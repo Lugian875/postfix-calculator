@@ -143,12 +143,11 @@ string* to_postfix(const string& infix) {
         // If operand, immediately appended to postfix string
         if (inChar >= '0' && inChar <= '9') {
             postfix[postIndex] = postfix[postIndex] + inChar;
-            cout << postfix[postIndex];
+            cout << postfix[postIndex] << endl;
             continue;
         }
 
         // Operator Comparisons //
-        cout << postfix_op_stack.peek() << endl;
         // Current Operator higher than at top? Push to stack
         if (postfix_op_stack.isEmpty() || operator_priority(to_string(inChar)) > operator_priority(postfix_op_stack.peek())) {
             postfix_op_stack.push(to_string(inChar));
@@ -163,12 +162,15 @@ string* to_postfix(const string& infix) {
         } while (!postfix_op_stack.isEmpty() && operator_priority(to_string(inChar)) <= operator_priority(postfix_op_stack.peek()));
         postfix_op_stack.push(to_string(inChar));
     }
+    // while (!postfix_op_stack.isEmpty()) {
+    //     postfix[postIndex] = postfix_op_stack.pop();
+    //     postIndex++;
+    // }
     return postfix;
 }
 
 // Print postfix
 void print_postfix(const string& postfix) {
-    cout << postfix.size() << endl;
 }
 
 // Arithmetic time
