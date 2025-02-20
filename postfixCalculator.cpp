@@ -59,11 +59,12 @@ void expressionCheck(string infix) {
         /* If input contains letters or special characters that are not arithmetic
         /  Throw an error with the nefarious character
         */
+        int size = sizeof(acceptableChars)/sizeof(acceptableChars[0]);
         for (int i = 0; i < infix.length(); i++) {
             if (infix[i] < '0' || infix[i] > '9') {  // Triggers when non-numerical character is found
-                for (int j = 0; j < size(acceptableChars); j++) { // Sorts through operator list
+                for (int j = 0; j < size; j++) { // Sorts through operator list
                     if (infix[i] == acceptableChars[j]) break;
-                    else if (j == size(acceptableChars) - 1) throw(infix[i]);
+                    if (j == size - 1) throw(infix[i]);
                 }
             }
         }
@@ -100,15 +101,14 @@ void parenthesesCheck(const string& infix) {
 
 // Operation priority: '^','*' '/' '%', '+' '-'
 int operator_priority(const string& oper) {
-    if (oper == "+" || oper == "-") {
+    if (oper == "(" || oper == "{" || oper == "[")
+        return 0;
+    if (oper == "+" || oper == "-")
         return 1;
-    }
-    if (oper == "*" || oper == "/" || oper == "%") {
+    if (oper == "*" || oper == "/" || oper == "%")
         return 2;
-    }
-    if (oper == "^") {
+    if (oper == "^")
         return 3;
-    }
    return 0;
 }
 
@@ -123,7 +123,9 @@ string* to_postfix(const string& infix) {
         // Open parenthesis? Push to stack
         if (inChar == '(' || inChar == '[' || inChar == '{') {
             postfix_op_stack.push(to_string(inChar));
-            postIndex++;
+            if (postIndex != 0)
+                postIndex++;
+            continue;
         }
         // Closed parenthesis? Pop operators and add to stack until open para. encountered. Do not add parenthesis to stack
         if (inChar == ')' || inChar == ']' || inChar == '}') {
@@ -135,33 +137,38 @@ string* to_postfix(const string& infix) {
                     postfix_op_stack.peek() != "[" ||
                     postfix_op_stack.peek() != "{"));
             postfix_op_stack.pop();
+            continue;
         }
 
         // If operand, immediately appended to postfix string
-        if (inChar >= '0' && inChar <= '9')
+        if (inChar >= '0' && inChar <= '9') {
             postfix[postIndex] = postfix[postIndex] + inChar;
-        else {
+            cout << postfix[postIndex];
+            continue;
+        }
 
         // Operator Comparisons //
-
+        cout << postfix_op_stack.peek() << endl;
         // Current Operator higher than at top? Push to stack
         if (postfix_op_stack.isEmpty() || operator_priority(to_string(inChar)) > operator_priority(postfix_op_stack.peek())) {
             postfix_op_stack.push(to_string(inChar));
             postIndex++;
-        } else {
-            // Same or lower? Pop operators and append those to the postfix until
-            // operator has different priority, then push to stack
-            do {
-                postIndex++;
-                postfix[postIndex] = inChar;
-            } while (operator_priority(to_string(inChar)) <= operator_priority(postfix_op_stack.peek()));
-            postfix_op_stack.push(to_string(inChar));
+            continue;
         }
-        }
+        // Same or lower? Pop operators and append those to the postfix until
+        // operator has different priority, then push to stack
+        do {
+            postIndex++;
+            postfix[postIndex] = postfix_op_stack.pop();
+        } while (!postfix_op_stack.isEmpty() && operator_priority(to_string(inChar)) <= operator_priority(postfix_op_stack.peek()));
+        postfix_op_stack.push(to_string(inChar));
     }
-
-
     return postfix;
+}
+
+// Print postfix
+void print_postfix(const string& postfix) {
+    cout << postfix.size() << endl;
 }
 
 // Arithmetic time
@@ -170,13 +177,14 @@ string* to_postfix(const string& infix) {
 
 
 int main() {
-    // Input a equation in infix format.
+    // Input an equation in infix format.
     string infixExpression;
     cout << "Enter an infix expression: ";
     getline(cin,infixExpression);
     expressionCheck(infixExpression);
     parenthesesCheck(infixExpression);
     string* postfixExpression = to_postfix(infixExpression);
+    print_postfix(*postfixExpression);
     delete[] postfixExpression;
 
     return 0;
