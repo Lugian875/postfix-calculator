@@ -1,3 +1,5 @@
+#include <cmath>
+#include <iomanip>
 #include <iostream>
 #include <string>
 using namespace std;
@@ -146,7 +148,6 @@ string* to_postfix(const string& infix) {
                 postfix[postIndex] = postfix_op_stack.pop();
                     }
             postfix_op_stack.pop();
-            postIndex++;
             continue;
         }
 
@@ -185,7 +186,8 @@ string* to_postfix(const string& infix) {
 }
 
 // Print postfix
-void print_postfix(string* postfix) {
+void print_postfix(const string* postfix) {
+    cout << "Postfix expression: ";
     int index = 0;
     while (postfix[index] != "a") {
         cout << postfix[index] << " ";
@@ -194,7 +196,39 @@ void print_postfix(string* postfix) {
     cout << endl;
 }
 
-// Arithmetic time
+// Arithmetic time. Operands (+,-,*,/,%.^
+double evaluatePostfix(const string* postfix) {
+    Stack evaluator;
+    int index = 0;
+    while (postfix[index] != "a") {
+        // If operator is encountered...
+        if(postfix[index] == "+" || postfix[index] == "-" || postfix[index] == "*"||
+            postfix[index] == "/" || postfix[index] == "%" || postfix[index] == "^") {
+        // Pop two operands from stack
+            double a = stod(evaluator.pop());
+            double b= stod(evaluator.pop());
+            char op = postfix[index][0];
+        // Evaluate with operator
+            double result;
+            switch (op) {
+                case '+': result = b+a; break;
+                case '-': result = b-a; break;
+                case '*': result = b*a; break;
+                case '/': result = b/a; break;
+                case '%': result = fmod(b,a); break;
+                case '^': result = pow(b,a); break;
+                default:
+                    cout << "no" << endl;
+            }
+        // Put result back in stack
+            evaluator.push(to_string(result));
+        } else {
+            evaluator.push(postfix[index]); // If operand is encountered, push it to stack
+        }
+        index++;
+    }
+    return stod(evaluator.pop());
+}
 // Do the arithmetic using stack
 // Return the result, round to 3 decimal places (use float)
 
@@ -208,6 +242,7 @@ int main() {
     parenthesesCheck(infixExpression);
     string* postfixExpression = to_postfix(infixExpression);
     print_postfix(postfixExpression);
+    cout << "Result: "<< fixed << setprecision(3) << evaluatePostfix(postfixExpression) << endl;
     delete[] postfixExpression;
 
     return 0;
