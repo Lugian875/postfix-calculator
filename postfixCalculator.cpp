@@ -129,6 +129,36 @@ string* to_postfix(const string& infix) {
             cout << "Index: " << postIndex << ", Current Value: " << postfix[postIndex] << endl << endl;
             continue;
         }
+
+        // Operator Check //
+        // If the operator priority is higher than the top of stack?
+        // Push to stack
+        if (postfix_op_stack.isEmpty() ||
+            operator_priority(to_string(inChar)) > operator_priority(postfix_op_stack.peek())) {
+            cout << "Operator detector, and it has higher priority: " << inChar << endl;
+            postfix_op_stack.push(string (1,inChar));
+            cout << "Top of the stack: " << postfix_op_stack.peek() << endl;
+            postIndex++;
+            continue;
+        }
+
+        // If the operator has same or lower priority than the top of the stack?
+        // Operators get popped and added to the postfix equation array until
+        // Current operator priority is higher than top of stack OR stack is empty
+        // Then push it to stack
+        if (operator_priority(to_string(inChar)) <= operator_priority(postfix_op_stack.peek())) {
+            cout << "Operator detector, and it has the same or lower priority: " << inChar << endl;
+            do {
+                postIndex++;
+                postfix[postIndex] = postfix_op_stack.pop();
+                cout << "Top of the stack: " << postfix_op_stack.peek() << endl;
+            } while (!postfix_op_stack.isEmpty() &&
+                operator_priority(to_string(inChar)) <= operator_priority(postfix_op_stack.peek()));
+            postfix_op_stack.push(string(1,inChar));
+            postIndex++;
+            continue;
+        }
+
     //     // Open parenthesis? Push to stack
     //     if (inChar == '(' || inChar == '[' || inChar == '{') {
     //         postfix_op_stack.push(to_string(inChar));
@@ -145,30 +175,19 @@ string* to_postfix(const string& infix) {
     //         postfix_op_stack.pop(); postIndex++;
     //         continue;
     //     }
-    //     // Operator Comparisons //
-    //     // Current Operator higher than at top? Push to stack
-    //     if (postfix_op_stack.isEmpty() || operator_priority(to_string(inChar)) > operator_priority(postfix_op_stack.peek())) {
-    //         postfix_op_stack.push(to_string(inChar));
-    //         postIndex++;
-    //         continue;
-    //     }
-    //     // Same or lower? Pop operators and append those to the postfix until
-    //     // operator has different priority, then push to stack
-    //     do {
-    //         postIndex++;
-    //         postfix[postIndex] = postfix_op_stack.pop();
-    //     } while (!postfix_op_stack.isEmpty() && operator_priority(to_string(inChar)) <= operator_priority(postfix_op_stack.peek()));
-    //     postfix_op_stack.push(to_string(inChar));
-    // }
-    // while (!postfix_op_stack.isEmpty()) {
-    //     postfix[postIndex] = postfix_op_stack.pop();
-    //     postIndex++;
     }
+    while (!postfix_op_stack.isEmpty()) {
+        postIndex++;
+        postfix[postIndex] = postfix_op_stack.pop();
+    }
+    // Control character "a" because I can't get the length of a dynamically allocated array
+    postIndex++; postfix[postIndex] = "a";
     return postfix;
 }
 
 // Print postfix
-void print_postfix(const string& postfix) {
+void print_postfix() {
+
 }
 
 // Arithmetic time
@@ -184,7 +203,7 @@ int main() {
     expressionCheck(infixExpression);
     parenthesesCheck(infixExpression);
     string* postfixExpression = to_postfix(infixExpression);
-    // print_postfix(*postfixExpression);
+    // print_postfix(postfixExpression);
     delete[] postfixExpression;
 
     return 0;
