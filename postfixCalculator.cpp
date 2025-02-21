@@ -8,41 +8,42 @@ using namespace std;
 class Stack {
     int top;
 public:
-    #define SIZE 10  // Maximum size of the stack.
-    string a[SIZE]; // Stack array
+    #define SIZE 20  // Maximum size of the stack.
+    string a[SIZE]; // String array represents stacks
     Stack() { top = -1; } // Stack constructor
 
-    // Pushes item to the top of the stack. If it goes over the size, then stack overflow!
+    // Pushes item to the top of the stack
+    // If it goes over the defined size, then a Stack Overflow error occurs
     void push(const string &item) {
         if (top >= (SIZE - 1)) {
-            cout << "Stack Overflow";
+            cout << "Stack Overflow. Breached maximum stack size of " << SIZE << endl;
+            throw runtime_error("Stack Overflow");
         } else {
             top++;
             a[top] = item;
         }
     }
 
-    // Pops item from the top of the stack. If it tries to pop an empty stack, then stack underflow!
+    // Pops item from the top of the stack.
+    // If an empty stack is attempted to be popped, then a Stack Underflow error occurs
     string pop() {
         if (top == -1) {
             cout << "Stack Underflow" << endl;
-            return "a";
+            throw runtime_error("Stack Underflow");
         }
             string x = a[top];
             top--;
             return x;
     }
 
-    // Takes a look at the top value in the stack
+    // Returns the value at the top of the stack
     string peek() const {
         if (top < 0) {
             cout << "Stack is Empty";
-            return "a"; // it is here for now I guess
+            return "a"; // control character
         }
-        else {
             string x = a[top];
             return x;
-        }
     }
 
     // Checks if the stack is empty
@@ -52,19 +53,18 @@ public:
 };
 
 
-// A check function
-/* If input contains letters or special characters that are not arithmetic
-*  Throw an error with the nefarious character
-*/
+/* Checks an infix expression to make sure it is valid
+ * It checks for proper operand, operator, and parenthesis placement
+ */
 void expressionCheck(const string& infix) {
-    // Array of acceptable non-numerical characters
-    char acceptableChars[] = {'+','-','*','/','%','^','(',')','[',']','{','}'};
-    int size = sizeof(acceptableChars)/sizeof(acceptableChars[0]);
+    // Array of acceptable non-numerical characters (operators)
+    char acceptableChars[] = {'+','-','*','/','%','^'};
+    int size = sizeof(acceptableChars)/sizeof(acceptableChars[0]); // Size of the infix equation string
 
-    Stack checker;
-    bool prevOper = true;
+    Stack checker; // Creates a stack to be used for parentheses balancing
+    bool prevOper = true; // Is the previous character an operator? This bool helps with throwing invalid operand errors
     for (int i = 0; i < infix.length(); i++) {
-        // If operand? Set prevNum to true
+        // Operand?
         if (infix[i] >= '0' && infix[i] <= '9') {
             prevOper = false;
             continue;
@@ -73,36 +73,51 @@ void expressionCheck(const string& infix) {
         // Open parenthesis? Push to stack.
         if (infix[i] == '(' || infix[i] == '{' || infix[i] == '[') {
             checker.push(string(1, infix[i]));
-           prevOper = false;
+            prevOper = false;
             continue;
         }
 
+        // Closed parenthesis?
         if (infix[i] == ')' || infix[i] == '}' || infix[i] == ']') {
+            // If stack is empty, throw an error
             if (checker.isEmpty()) {
                 cout << "Error: Invalid parentheses" << endl;
                 throw runtime_error("Invalid parenthesis");
             }
-            char top = checker.peek()[0];
+            char top = checker.peek()[0]; // The value at the top of the stack
+            // Mismatched parentheses? Throw an error
             if((top == '(' && infix[i] != ')') ||
                 (top == '[' && infix[i] != ']')||
                 (top == '{' && infix[i] != '}')) {
                 cout << "Error: Invalid parentheses" << endl;
                 throw runtime_error("Invalid parenthesis");
             }
+            // If all checks pass, pops the corresponding open parentheses from the stack
             prevOper = false;
             checker.pop();
             continue;
         }
 
+        // Operator?
         for (int j = 0; j < size; j++) {
-            if (prevOper == true || i == infix.length() - 1 || infix[i] == ' ') {
+            // If the previous entry was an operator, or it is at the end...
+            // There is an invalid number of operands. Throws error
+            if (prevOper == true || i == infix.length() - 1) {
                 cout << "Error: Invalid number of operands" << endl;
-                throw runtime_error("Invalid operator #");
+                throw runtime_error("Invalid operand#");
             }
+            // If there is a space character...
+            // There is an invalid number of operators. Throws error.
+            if (infix[i] == ' ') {
+                cout << "Error: Invalid number of operators" << endl;
+                throw runtime_error("Invalid operators#");
+            }
+            // If the operator is a part of the list, then break from the loop
             if (infix[i] == acceptableChars[j]) {
                 prevOper = true;
                 break;
             }
+            // If the list is exhausted, then the checked character must be invalid. Throws error
             if (j == size - 1) {
                 cout << "Error: Invalid character '" << infix[i] <<"' in the expression" << endl;
                 throw runtime_error("Invalid character in expression");
@@ -110,10 +125,6 @@ void expressionCheck(const string& infix) {
         }
     }
 }
-
-/* Checks for the correct parentheses count in the string using a stack
-* If the stack is empty, then the equation is balanced. If not, throws an error
-*/
 
 
 // Operation priority: '^','*' '/' '%', '+' '-'
@@ -130,30 +141,30 @@ int operator_priority(const string& oper) {
 }
 
 
-// Infix to Postfix conversion
+// Converts an infix equation (human-readable) to a postfix equation (computer-readable)
 string* to_postfix(const string& infix) {
-    Stack postfix_op_stack;
-    string* postfix = new string[infix.size() + 1];
+    Stack postfix_op_stack; // Stack used to manipulate the infix equation
+    string* postfix = new string[infix.size() + 1]; // Stores the postfix equation as a string array
     int postIndex = 0; // Current index of the postfix equation array
     // Reads the infix expression
     for (const char inChar : infix) {
-
-        // If operand, immediately appended to postfix string
+        // Operand? Append to the current index of the postfix array. Supports multi-digit numbers
         if (inChar >= '0' && inChar <= '9') {
             postfix[postIndex] = postfix[postIndex] + inChar;
             continue;
         }
 
-        // Parenthesis check
+        // Parenthesis Checks //
         // Open parenthesis? Push to stack
         if (inChar=='(' || inChar =='[' || inChar == '{') {
             postfix_op_stack.push(string(1,inChar));
             continue;
         }
 
-        // Closed parenthesis?
-        // Pop operators and add to postfix until an open parenthesis is popped
-        // Do not add parenthesis to postfix
+        /* Closed parenthesis?
+        * Pop operators and add to postfix until an open parenthesis is popped.
+        * They are not added to the string.
+        */
         if (inChar == ')' || inChar == ']' || inChar == '}') {
             while (postfix_op_stack.peek() != "(" &&
                     postfix_op_stack.peek() != "[" &&
@@ -166,7 +177,7 @@ string* to_postfix(const string& infix) {
         }
 
         // Operator Check //
-        // If the operator priority is higher than the top of stack?
+        // The operator priority is higher than that of top of stack?
         // Push to stack
         if (postfix_op_stack.isEmpty() ||
             operator_priority(string(1,inChar)) > operator_priority(postfix_op_stack.peek())) {
@@ -175,10 +186,11 @@ string* to_postfix(const string& infix) {
             continue;
         }
 
-        // If the operator has same or lower priority than the top of the stack?
-        // Operators get popped and added to the postfix equation array until
-        // Current operator priority is higher than top of stack OR stack is empty
-        // Then push it to stack
+        /* The operator has same or lower priority than the top of the stack?
+        * Operators get popped and added to the postfix equation array until the
+        * current operator priority is higher than top of stack OR stack is empty.
+        * Then that operator is pushed to stack
+        */
         if (operator_priority(string(1,inChar)) <= operator_priority(postfix_op_stack.peek())) {
             while (!postfix_op_stack.isEmpty() &&
                 operator_priority(string(1,inChar)) <= operator_priority(postfix_op_stack.peek())) {
@@ -189,19 +201,20 @@ string* to_postfix(const string& infix) {
             postIndex++;
         }
     }
+    // Pops any leftover operators from the stack and adds them to the postfix array
     while (!postfix_op_stack.isEmpty()) {
         postIndex++;
         postfix[postIndex] = postfix_op_stack.pop();
     }
-    // Control character "a" because I can't get the length of a dynamically allocated array
-    postIndex++; postfix[postIndex] = "a";
+    postIndex++; postfix[postIndex] = "a"; // Adds "a" as the last value in the postfix to serve as a control character
     return postfix;
 }
 
-// Print postfix
+// Prints the postfix equation
 void print_postfix(const string* postfix) {
     cout << "Postfix expression: ";
     int index = 0;
+    // Prints out values until reaching the control character
     while (postfix[index] != "a") {
         cout << postfix[index] << " ";
         index++;
@@ -209,11 +222,14 @@ void print_postfix(const string* postfix) {
     cout << endl;
 }
 
-// Arithmetic time. Operands (+,-,*,/,%.^
+/* Evaluates the postfix equation.
+*  Supports addition, subtraction, multiplication, division, modulo, and exponents
+*/
 double evaluatePostfix(const string* postfix) {
-    Stack evaluator;
-    int index = 0;
-    double result = 0;
+    Stack evaluator; // Stack used for operations
+    int index = 0; // Current index in the postfix string array
+    double result = 0; // Stores results of operations
+
     while (postfix[index] != "a") {
         // If operator is encountered...
         if(postfix[index] == "+" || postfix[index] == "-" || postfix[index] == "*"||
@@ -227,7 +243,7 @@ double evaluatePostfix(const string* postfix) {
                 case '+': result = b+a; break;
                 case '-': result = b-a; break;
                 case '*': result = b*a; break;
-                case '/': if (a == 0) { cout << "Error: Dividing by Zero" << endl;
+                case '/': if (a == 0) { cout << "Error: Dividing by Zero" << endl; // Divide by Zero catch
                         throw runtime_error("Divide by Zero catch");
                     }
                     result = b/a; break;
@@ -248,16 +264,20 @@ double evaluatePostfix(const string* postfix) {
 
 
 int main() {
-    // Input an equation in infix format.
+    // Prompts the user to input an expression in infix format
     string infixExpression;
-    cout << "Enter an infix expression: ";
+    cout << "Enter an infix expression (no spaces): ";
     getline(cin,infixExpression);
-    expressionCheck(infixExpression);
-    // parenthesesCheck(infixExpression);
-    string* postfixExpression = to_postfix(infixExpression);
-    print_postfix(postfixExpression);
-    cout << "Result: "<< fixed << setprecision(3) << evaluatePostfix(postfixExpression) << endl;
-    delete[] postfixExpression;
 
+    expressionCheck(infixExpression); // Checks expression for errors
+
+    string* postfixExpression = to_postfix(infixExpression); // Transform the infix expression to postfix
+
+    print_postfix(postfixExpression); // Prints postfix expression
+
+    // Evaluates the postfix expression
+    cout << "Result: "<< fixed << setprecision(3) << evaluatePostfix(postfixExpression) << endl;
+
+    delete[] postfixExpression;
     return 0;
 }
