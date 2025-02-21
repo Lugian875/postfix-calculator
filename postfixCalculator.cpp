@@ -53,34 +53,29 @@ public:
 
 
 // A check function
-void expressionCheck(string infix) {
-    // The only acceptable symbols, operators
-    char acceptableChars[] = {'+','-','*','/','%','^','(',')','[',']','{','}'};
-
-    /* If input contains letters or special characters that are not arithmetic
-    /  Throw an error with the nefarious character
-    */
-    int size = sizeof(acceptableChars)/sizeof(acceptableChars[0]);
-    for (int i = 0; i < infix.length(); i++) {
-        if (infix[i] < '0' || infix[i] > '9') {  // Triggers when non-numerical character is found
-            for (int j = 0; j < size; j++) { // Sorts through operator list
-                if (infix[i] == acceptableChars[j]) break;
-                if (j == size - 1) throw(infix[i]);
-            }
-        }
-    }
-}
-
-/* Checks for the correct parentheses count in the string using a stack
-* If the stack is empty, then the equation is balanced. If not, throws an error
+/* If input contains letters or special characters that are not arithmetic
+*  Throw an error with the nefarious character
 */
-// TO DO: Expand parentheses check to also be operands check :D
-void parenthesesCheck(const string& infix) {
+void expressionCheck(const string& infix) {
+    // Array of acceptable non-numerical characters
+    char acceptableChars[] = {'+','-','*','/','%','^','(',')','[',']','{','}'};
+    int size = sizeof(acceptableChars)/sizeof(acceptableChars[0]);
+
     Stack checker;
+    bool prevOper = true;
     for (int i = 0; i < infix.length(); i++) {
+        // If operand? Set prevNum to true
+        if (infix[i] >= '0' && infix[i] <= '9') {
+            prevOper = false;
+            continue;
+        }
+
         // Open parenthesis? Push to stack.
-        if (infix[i] == '(' || infix[i] == '{' || infix[i] == '[')
+        if (infix[i] == '(' || infix[i] == '{' || infix[i] == '[') {
             checker.push(string(1, infix[i]));
+           prevOper = false;
+            continue;
+        }
 
         if (infix[i] == ')' || infix[i] == '}' || infix[i] == ']') {
             if (checker.isEmpty()) {
@@ -91,12 +86,34 @@ void parenthesesCheck(const string& infix) {
             if((top == '(' && infix[i] != ')') ||
                 (top == '[' && infix[i] != ']')||
                 (top == '{' && infix[i] != '}')) {
-                    cout << "Error: Invalid parentheses" << endl;
-                    throw runtime_error("Invalid parenthesis");
+                cout << "Error: Invalid parentheses" << endl;
+                throw runtime_error("Invalid parenthesis");
+            }
+            prevOper = false;
+            checker.pop();
+            continue;
+        }
+
+        for (int j = 0; j < size; j++) {
+            if (prevOper == true || i == infix.length() - 1 || infix[i] == ' ') {
+                cout << "Error: Invalid number of operands" << endl;
+                throw runtime_error("Invalid operator #");
+            }
+            if (infix[i] == acceptableChars[j]) {
+                prevOper = true;
+                break;
+            }
+            if (j == size - 1) {
+                cout << "Error: Invalid character '" << infix[i] <<"' in the expression" << endl;
+                throw runtime_error("Invalid character in expression");
             }
         }
     }
 }
+
+/* Checks for the correct parentheses count in the string using a stack
+* If the stack is empty, then the equation is balanced. If not, throws an error
+*/
 
 
 // Operation priority: '^','*' '/' '%', '+' '-'
@@ -196,6 +213,7 @@ void print_postfix(const string* postfix) {
 double evaluatePostfix(const string* postfix) {
     Stack evaluator;
     int index = 0;
+    double result = 0;
     while (postfix[index] != "a") {
         // If operator is encountered...
         if(postfix[index] == "+" || postfix[index] == "-" || postfix[index] == "*"||
@@ -205,12 +223,14 @@ double evaluatePostfix(const string* postfix) {
             double b= stod(evaluator.pop());
             char op = postfix[index][0];
         // Evaluate with operator
-            double result;
             switch (op) {
                 case '+': result = b+a; break;
                 case '-': result = b-a; break;
                 case '*': result = b*a; break;
-                case '/': result = b/a; break;
+                case '/': if (a == 0) { cout << "Error: Dividing by Zero" << endl;
+                        throw runtime_error("Divide by Zero catch");
+                    }
+                    result = b/a; break;
                 case '%': result = fmod(b,a); break;
                 case '^': result = pow(b,a); break;
                 default:
@@ -233,7 +253,7 @@ int main() {
     cout << "Enter an infix expression: ";
     getline(cin,infixExpression);
     expressionCheck(infixExpression);
-    parenthesesCheck(infixExpression);
+    // parenthesesCheck(infixExpression);
     string* postfixExpression = to_postfix(infixExpression);
     print_postfix(postfixExpression);
     cout << "Result: "<< fixed << setprecision(3) << evaluatePostfix(postfixExpression) << endl;
