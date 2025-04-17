@@ -21,10 +21,21 @@ This function is called to check the user-typed infix expression for any problem
 - It also checks for invalid characters and displays them if detected
 
 ## to_postfix() function
-_WIP_
+This function is called to convert an infix equation (one that is human readable) to a postfix equation (one that is computer readable).
+- The infix equation is read one character at a time
+- It understands multi-digit operands
+- Parenthesis and operators are pushed and popped from the stack under certain conditions
+  - Open parenthesis are pushed to a stack
+  - Closed parenthesis pops everything from the stack and appends them to the postfix equation string from the stack until reaching a matching open parenthesis. Both parentheses are not appended to the string.
+  - Operators follow order-of-operations, with operators assigned a certain priority. If their priority is higher, it is pushed to stack. If their priority is lower, operators are continuously popped from the stack and added to the string until become a higher priority than the one at the top, then that is pushed to the stack.
+  - At the end, the remaining operators are appended to the end of the string.
+
 ## print_postfix() function
-_WIP_
+Simply prints the equation in postfix form, which was a string made in the previous function.
 ## evaluate_postfix() function
-_WIP_
+This function evaluates the postfix function like a computer.
 ## main() function
+Prompts the user for input in infix form, then runs through all the functions. It prints the postfix expression as well as the result, if it doesn't run into any errors.
+
+# Example Output from Input
 _WIP_
